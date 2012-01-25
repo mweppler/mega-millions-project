@@ -1,0 +1,5 @@
+Build:
+
+javac -cp bin:lib/matt-weppler-common-utils.jar src/info/mattweppler/lotto/*.java -d bin -verbose
+
+java -cp bin:lib/matt-weppler-common-utils.jar info.mattweppler.lotto.Lotto

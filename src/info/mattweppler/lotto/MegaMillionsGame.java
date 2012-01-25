@@ -7,11 +7,10 @@ package info.mattweppler.lotto;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
 
 public class MegaMillionsGame
 {
@@ -60,12 +59,10 @@ public class MegaMillionsGame
         this.winningNumbers = winningNumbers;
     }
     
-    
     public void setMegaNumber(int megaNumber)
     {
         this.megaNumber = megaNumber;
     }
-
 
     @Override
     public String toString()
@@ -90,71 +87,61 @@ public class MegaMillionsGame
         return builder.toString();
     }
 
+    private static void setGameBall(int i, ArrayList<GameBall> gb)
+    {
+    	GameBall testGameBall = new GameBall(i);
+    	if (gb.contains(testGameBall)) {
+    		testGameBall = gb.get(gb.indexOf(testGameBall));
+    		testGameBall.setDrawnFrequency(testGameBall.getDrawnFrequency() + 1);
+        } else {
+            testGameBall.setDrawnFrequency(1);
+            gb.add(testGameBall);
+        }
+    }
     public static void retrieveIncrementedSortedResults(ArrayList<MegaMillionsGame> mmgList)
     {
-        HashMap<Integer, Integer> winningNumbers = new HashMap<Integer, Integer>();
-        for (int i=1;i<57;i++) {
-            winningNumbers.put(i, 0);
-        }
-        HashMap<Integer, Integer> megaNumbers = new HashMap<Integer, Integer>();
-        for (int i=1;i<47;i++) {
-            megaNumbers.put(i, 0);
-        }
+    	ArrayList<GameBall> winningNumbers = new ArrayList<GameBall>();
+    	ArrayList<GameBall> megaNumbers = new ArrayList<GameBall>();
         for (MegaMillionsGame mmg : mmgList) {
             for (int i : mmg.getWinningNumbers()) {
-                if (winningNumbers.containsKey(i)) {
-                    winningNumbers.put(i, winningNumbers.get(i).intValue() + 1);
-                }
+            	setGameBall(i, winningNumbers);
             }
-            megaNumbers.put(mmg.getMegaNumber(), megaNumbers.get(mmg.getMegaNumber()).intValue() + 1);
+            setGameBall(mmg.getMegaNumber(), megaNumbers);
         }
-        
-        HashMap<Integer, Integer> winningNumbersSorted = new HashMap<Integer, Integer>();
-        winningNumbersSorted = sortHashMap(winningNumbers, "DESC");
-        
-        HashMap<Integer, Integer> megaNumbersSorted = new HashMap<Integer, Integer>();
-        megaNumbersSorted = sortHashMap(megaNumbers, "DESC");
-        
+//        String sortBy = "label";
+        String sortBy = "frequency";
+        if (sortBy.equals("label")) {
+        	Collections.sort(winningNumbers, new LabelComparison());
+            Collections.sort(megaNumbers, new LabelComparison());
+        } else {
+        	Collections.sort(winningNumbers, new FrequencyComparison());
+        	Collections.sort(megaNumbers, new FrequencyComparison());
+        }
         System.out.println("Winning Numbers:");
-        for (Integer number : winningNumbersSorted.keySet()){
-            System.out.println("\t"+number+" "+winningNumbersSorted.get(number));
+        System.out.println("\tNumber\tFrequency");
+        for (GameBall gameBall : winningNumbers){
+            System.out.printf("\t%2d\t%2d\n", gameBall.getLabel(), gameBall.getDrawnFrequency());
         }
-        
-        System.out.println("Mega Numbers:");
-        for (Integer number : megaNumbersSorted.keySet()){
-            System.out.println("\t"+number+" "+megaNumbersSorted.get(number));
+        System.out.println("\nMega Numbers:");
+        System.out.println("\tNumber\tFrequency");
+        for (GameBall gameBall : megaNumbers){
+        	System.out.printf("\t%2d\t%2d\n", gameBall.getLabel(), gameBall.getDrawnFrequency());
         }
     }
-    
-    /**
-     * 
-     * @param input
-     * @param order "ASC" or "DESC"
-     * @return
-     */
-    private static HashMap<Integer, Integer> sortHashMap(HashMap<Integer, Integer> input, String order){
-        Map<Integer, Integer> tempMap = new HashMap<Integer, Integer>();
-        for (int i : input.keySet()){
-            tempMap.put(i, input.get(i));
+    public static class LabelComparison implements Comparator<GameBall> {
+        @Override
+        public int compare(GameBall gb1, GameBall gb2) {
+        	Integer tmp1 = (Integer) gb1.getLabel();
+        	Integer tmp2 = (Integer) gb2.getLabel();
+            return tmp1.compareTo(tmp2);
         }
-
-        List<Integer> mapKeys = new ArrayList<Integer>(tempMap.keySet());
-        List<Integer> mapValues = new ArrayList<Integer>(tempMap.values());
-        HashMap<Integer, Integer> sortedMap = new LinkedHashMap<Integer, Integer>();
-        TreeSet<Integer> sortedSet = new TreeSet<Integer>(mapValues);
-        Object[] sortedArray = sortedSet.toArray();
-        if (order.equals("ASC")) {
-            for (int i=0; i<sortedArray.length; i++){
-                sortedMap.put(mapKeys.get(mapValues.indexOf(sortedArray[i])), 
-                              (Integer)sortedArray[i]);
-            }
-        } else if (order.equals("DESC")) {
-            for (int i=sortedArray.length; i>0; i--){
-                sortedMap.put(mapKeys.get(mapValues.indexOf(sortedArray[i-1])), 
-                              (Integer)sortedArray[i-1]);
-            }
+    }    
+    public static class FrequencyComparison implements Comparator<GameBall> {
+        @Override
+        public int compare(GameBall gb1, GameBall gb2) {
+        	Integer tmp1 = (Integer) gb1.getDrawnFrequency();
+        	Integer tmp2 = (Integer) gb2.getDrawnFrequency();
+            return tmp2.compareTo(tmp1);
         }
-        return sortedMap;
     }
-    
 }

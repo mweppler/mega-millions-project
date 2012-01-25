@@ -14,7 +14,7 @@ public class ParseLottoResultsFile
     {
         ArrayList<MegaMillionsGame> mmgList = new ArrayList<MegaMillionsGame>();
         //for (String string : FileUtils.readFileByLine(FileUtils.openFileDialog())) {
-        for (String string : FileUtils.readFileByLine(new File("/Users/mweppler/Development/Projects/Lotto/calottoresults.csv"))) {
+        for (String string : FileUtils.readFileByLine(new File("/Users/mattweppler/developer/projects/lotto/calottoresults.csv"))) {
             String[] result = string.split("\\,");
             MegaMillionsGame mmg = new MegaMillionsGame();
             mmg.setDrawNumber(Integer.parseInt(result[0]));
